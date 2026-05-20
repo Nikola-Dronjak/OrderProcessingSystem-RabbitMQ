@@ -1,23 +1,20 @@
-﻿using Microsoft.Extensions.Options;
-using OrderModule.Configuration;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace OrderModule.Messaging
+namespace Common.Messaging.RabbitMQ
 {
     public class RabbitMQMessageBus : IMessageBus
     {
-        private const string ExchangeName = "order-processing";
-
-        private readonly RabbitMQSettings settings;
         private readonly IConnection connection;
         private readonly IChannel channel;
         private readonly ILogger<RabbitMQMessageBus> logger;
 
         public RabbitMQMessageBus(IOptions<RabbitMQSettings> options, ILogger<RabbitMQMessageBus> logger)
         {
-            this.settings = options.Value;
+            RabbitMQSettings settings = options.Value;
 
             ConnectionFactory factory = new ConnectionFactory
             {
@@ -33,10 +30,10 @@ namespace OrderModule.Messaging
             this.logger = logger;
         }
 
-        public async Task PublishAsync<T>(string topic, T message, CancellationToken cancellationToken)
+        public async Task PublishAsync<T>(string routingKey, T message, CancellationToken cancellationToken)
         {
             await this.channel.ExchangeDeclareAsync(
-                exchange: ExchangeName,
+                exchange: RabbitMQConstants.ExchangeName,
                 type: ExchangeType.Topic,
                 durable: true,
                 autoDelete: false,
@@ -50,8 +47,8 @@ namespace OrderModule.Messaging
             };
 
             await this.channel.BasicPublishAsync(
-                exchange: ExchangeName,
-                routingKey: topic,
+                exchange: RabbitMQConstants.ExchangeName,
+                routingKey: routingKey,
                 mandatory: false,
                 basicProperties: properties,
                 body: body,
@@ -63,8 +60,8 @@ namespace OrderModule.Messaging
                 RoutingKey: {RoutingKey}
                 Payload: {Payload}
                 """,
-                ExchangeName,
-                topic,
+                RabbitMQConstants.ExchangeName,
+                routingKey,
                 payload);
         }
 

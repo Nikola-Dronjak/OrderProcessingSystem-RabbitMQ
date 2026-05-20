@@ -1,4 +1,4 @@
-﻿namespace OrderModule.Configuration
+﻿namespace Common.Messaging.RabbitMQ
 {
     public class RabbitMQSettings
     {

@@ -1,13 +1,11 @@
-using OrderModule.Configuration;
-using OrderModule.Messaging;
+using Common.Messaging.Extensions;
 using OrderModule.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
-builder.Services.AddSingleton<IMessageBus, RabbitMQMessageBus>();
+builder.Services.AddRabbitMQMessaging(builder.Configuration);
 
 builder.Services.AddScoped<IOrderService, OrderService>();
 

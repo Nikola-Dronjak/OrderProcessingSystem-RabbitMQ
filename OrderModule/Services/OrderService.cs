@@ -1,5 +1,5 @@
-﻿using OrderModule.Events;
-using OrderModule.Messaging;
+﻿using Common.Events;
+using Common.Messaging;
 using OrderModule.Models;
 
 namespace OrderModule.Services
@@ -25,8 +25,8 @@ namespace OrderModule.Services
                 ProductId = createOrderRequest.ProductId,
                 Quantity = createOrderRequest.Quantity,
                 Price = createOrderRequest.Price,
-                CreatedDate = DateTime.UtcNow,
-                CorrelationId = correlationId
+                CorrelationId = correlationId,
+                Timestamp = DateTime.UtcNow
             };
 
             logger.LogInformation("Publishing OrderCreatedEvent for OrderId: {OrderId}, CorrelationId: {CorrelationId}", orderId, correlationId);
