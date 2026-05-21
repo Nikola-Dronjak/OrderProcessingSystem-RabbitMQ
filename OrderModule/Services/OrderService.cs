@@ -1,5 +1,6 @@
 ﻿using Common.Events;
 using Common.Messaging;
+using Common.Messaging.RabbitMQ;
 using OrderModule.Models;
 
 namespace OrderModule.Services
@@ -31,7 +32,10 @@ namespace OrderModule.Services
 
             logger.LogInformation("Publishing OrderCreatedEvent for OrderId: {OrderId}, CorrelationId: {CorrelationId}", orderId, correlationId);
 
-            await messageBus.PublishAsync("order-created", orderCreatedEvent, cancellationToken);
+            await messageBus.PublishAsync(
+                routingKey: RabbitMQConstants.OrderCreatedRoutingKey,
+                message: orderCreatedEvent,
+                cancellationToken: cancellationToken);
 
             return orderId;
         }

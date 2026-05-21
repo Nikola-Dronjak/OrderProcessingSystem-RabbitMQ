@@ -1,4 +1,5 @@
-﻿using Common.Events;
+﻿using Common.Commands;
+using Common.Events;
 using Common.Messaging;
 using Common.Messaging.RabbitMQ;
 using Microsoft.Extensions.Options;
@@ -7,19 +8,19 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace InventoryModule.Consumers
+namespace OrderModule.Consumers
 {
-    public class OrderCreatedConsumer : BackgroundService
+    public class InventoryReservedConsumer : BackgroundService
     {
-        private const string QueueName = "inventory.order-created";
+        private const string QueueName = "order.inventory-reserved";
 
         private readonly RabbitMQSettings settings;
         private readonly IMessageBus messageBus;
         private IConnection connection;
         private IChannel channel;
-        private readonly ILogger<OrderCreatedConsumer> logger;
+        private readonly ILogger<InventoryReservedConsumer> logger;
 
-        public OrderCreatedConsumer(IOptions<RabbitMQSettings> options, IMessageBus messageBus, ILogger<OrderCreatedConsumer> logger)
+        public InventoryReservedConsumer(IOptions<RabbitMQSettings> options, IMessageBus messageBus, ILogger<InventoryReservedConsumer> logger)
         {
             this.settings = options.Value;
             this.messageBus = messageBus;
@@ -56,7 +57,7 @@ namespace InventoryModule.Consumers
             await this.channel.QueueBindAsync(
                 queue: QueueName,
                 exchange: RabbitMQConstants.ExchangeName,
-                routingKey: RabbitMQConstants.OrderCreatedRoutingKey,
+                routingKey: RabbitMQConstants.InventoryReservedRoutingKey,
                 cancellationToken: stoppingToken);
 
             AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.channel);
@@ -68,26 +69,24 @@ namespace InventoryModule.Consumers
 
                     this.logger.LogInformation("MESSAGE RECEIVED: {Message}", json);
 
-                    OrderCreatedEvent? orderCreatedEvent = JsonSerializer.Deserialize<OrderCreatedEvent>(json);
-                    if (orderCreatedEvent == null)
+                    InventoryReservedEvent? inventoryReservedEvent = JsonSerializer.Deserialize<InventoryReservedEvent>(json);
+                    if (inventoryReservedEvent == null)
                         return;
 
-                    // Simulate inventory processing logic
+                    // Simulate orchestration processing time
                     await Task.Delay(Random.Shared.Next(500, 2000), stoppingToken);
 
-                    InventoryReservedEvent inventoryReservedEvent = new InventoryReservedEvent
+                    ProcessPaymentCommand processPaymentCommand = new ProcessPaymentCommand
                     {
-                        OrderId = orderCreatedEvent.OrderId,
-                        ProductId = orderCreatedEvent.ProductId,
-                        Quantity = orderCreatedEvent.Quantity,
-                        Price = orderCreatedEvent.Price,
-                        CorrelationId = orderCreatedEvent.CorrelationId,
+                        OrderId = inventoryReservedEvent.OrderId,
+                        Price = inventoryReservedEvent.Price,
+                        CorrelationId = inventoryReservedEvent.CorrelationId,
                         Timestamp = DateTime.UtcNow
                     };
 
                     await this.messageBus.PublishAsync(
-                        routingKey: RabbitMQConstants.InventoryReservedRoutingKey,
-                        message: inventoryReservedEvent,
+                        routingKey: RabbitMQConstants.ProcessPaymentRoutingKey,
+                        message: processPaymentCommand,
                         cancellationToken: stoppingToken);
 
                     await this.channel.BasicAckAsync(
@@ -95,7 +94,7 @@ namespace InventoryModule.Consumers
                         multiple: false,
                         cancellationToken: stoppingToken);
 
-                    this.logger.LogInformation("Inventory reserved for order {OrderId}", orderCreatedEvent.OrderId);
+                    this.logger.LogInformation("Process payment for order {OrderId}", processPaymentCommand.OrderId);
                 }
                 catch (Exception ex)
                 {
@@ -118,7 +117,7 @@ namespace InventoryModule.Consumers
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
-            this.logger.LogInformation("Inventory consumer started");
+            this.logger.LogInformation("InventoryReserved consumer started");
 
             await Task.Delay(Timeout.Infinite, stoppingToken);
         }

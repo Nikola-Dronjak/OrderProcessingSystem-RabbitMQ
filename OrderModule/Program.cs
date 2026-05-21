@@ -1,4 +1,5 @@
 using Common.Messaging.Extensions;
+using OrderModule.Consumers;
 using OrderModule.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRabbitMQMessaging(builder.Configuration);
 
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddHostedService<InventoryReservedConsumer>();
 
 builder.Services.AddControllers();
 
