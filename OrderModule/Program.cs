@@ -11,6 +11,7 @@ builder.Services.AddRabbitMQMessaging(builder.Configuration);
 builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddHostedService<InventoryReservedConsumer>();
+builder.Services.AddHostedService<PaymentSucceededConsumer>();
 
 builder.Services.AddControllers();
 

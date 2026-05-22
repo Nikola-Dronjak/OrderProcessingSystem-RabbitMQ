@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentModule", "PaymentModule\PaymentModule.csproj", "{9FB0DE8D-CB54-46A8-8AC0-016B99D166CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationModule", "NotificationModule\NotificationModule.csproj", "{8565C2C0-C651-4F18-8E08-08727D2D4949}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{9FB0DE8D-CB54-46A8-8AC0-016B99D166CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FB0DE8D-CB54-46A8-8AC0-016B99D166CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FB0DE8D-CB54-46A8-8AC0-016B99D166CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
