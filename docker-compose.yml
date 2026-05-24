@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  order-service:
+    build:
+      context: .
+      dockerfile: OrderModule/Dockerfile
+    container_name: order-module
+    ports:
+      - "8080:8080"
+    depends_on:
+      - rabbitmq
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: InventoryModule/Dockerfile
+    container_name: inventory-module
+    depends_on:
+      - rabbitmq
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: PaymentModule/Dockerfile
+    container_name: payment-module
+    depends_on:
+      - rabbitmq
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: NotificationModule/Dockerfile
+    container_name: notification-module
+    depends_on:
+      - rabbitmq

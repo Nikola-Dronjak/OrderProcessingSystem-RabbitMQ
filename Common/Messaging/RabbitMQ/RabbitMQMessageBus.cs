@@ -10,24 +10,14 @@ namespace Common.Messaging.RabbitMQ
     {
         private readonly IConnection connection;
         private readonly IChannel channel;
+        private readonly RabbitMQSettings settings;
         private readonly ILogger<RabbitMQMessageBus> logger;
 
         public RabbitMQMessageBus(IOptions<RabbitMQSettings> options, ILogger<RabbitMQMessageBus> logger)
         {
-            RabbitMQSettings settings = options.Value;
-
-            ConnectionFactory factory = new ConnectionFactory
-            {
-                HostName = settings.HostName,
-                Port = settings.Port,
-                UserName = settings.Username,
-                Password = settings.Password
-            };
-
-            this.connection = factory.CreateConnectionAsync().Result;
-            this.channel = this.connection.CreateChannelAsync().Result;
-
+            this.settings = options.Value;
             this.logger = logger;
+            (this.connection, this.channel) = this.InitializeRabbitMQ();
         }
 
         public async Task PublishAsync<T>(string routingKey, T message, CancellationToken cancellationToken)
@@ -69,6 +59,52 @@ namespace Common.Messaging.RabbitMQ
         {
             this.channel?.Dispose();
             this.connection?.Dispose();
+        }
+
+        private (IConnection, IChannel) InitializeRabbitMQ()
+        {
+            ConnectionFactory factory = new ConnectionFactory
+            {
+                HostName = this.settings.HostName,
+                Port = this.settings.Port,
+                UserName = this.settings.Username,
+                Password = this.settings.Password
+            };
+
+            const int maxRetries = 10;
+            TimeSpan retryDelay = TimeSpan.FromSeconds(5);
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    this.logger.LogInformation(
+                        """
+                        Attempting RabbitMQ connection.
+                        Attempt: {Attempt}
+                        """,
+                        attempt);
+
+                    IConnection connection = factory.CreateConnectionAsync().Result;
+                    IChannel channel = connection.CreateChannelAsync().Result;
+
+                    this.logger.LogInformation("RabbitMQ connection established");
+
+                    return (connection, channel);
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogWarning(
+                        ex,
+                        """
+                        RabbitMQ connection attempt failed.
+                        Attempt: {Attempt}
+                        """,
+                        attempt);
+
+                    Thread.Sleep(retryDelay);
+                }
+            }
+            throw new InvalidOperationException("Failed to establish RabbitMQ connection after maximum retry attempts.");
         }
     }
 }
