@@ -10,6 +10,8 @@
         public const string InventoryReservedRoutingKey = "inventory-reserved";
         public const string ProcessPaymentRoutingKey = "process-payment";
         public const string PaymentSucceededRoutingKey = "payment-succeeded";
+        public const string PaymentFailedRoutingKey = "payment-failed";
+        public const string PaymentDeadLetterRoutingKey = "payment-dead-letter";
         public const string OrderCompletedRoutingKey = "order-completed";
     }
 }
