@@ -1,5 +1,5 @@
-﻿using Common.Events;
-using Common.Messaging;
+﻿using BenchmarkModule.Services;
+using Common.Events;
 using Common.Messaging.RabbitMQ;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -7,22 +7,22 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace NotificationModule.Consumers
+namespace BenchmarkModule.Consumers
 {
-    public class OrderCompletedConsumer : BackgroundService
+    public class NotificationSentConsumer : BackgroundService
     {
-        private const string QueueName = "notification.order-completed";
+        private const string QueueName = "benchmark.notification-sent";
 
         private readonly RabbitMQSettings settings;
-        private readonly IMessageBus messageBus;
+        private readonly IMetricsCollectorService metricsCollectorService;
         private IConnection connection;
         private IChannel channel;
-        private readonly ILogger<OrderCompletedConsumer> logger;
+        private readonly ILogger<NotificationSentConsumer> logger;
 
-        public OrderCompletedConsumer(IOptions<RabbitMQSettings> options, IMessageBus messageBus, ILogger<OrderCompletedConsumer> logger)
+        public NotificationSentConsumer(IOptions<RabbitMQSettings> options, IMetricsCollectorService metricsCollectorService, ILogger<NotificationSentConsumer> logger)
         {
             this.settings = options.Value;
-            this.messageBus = messageBus;
+            this.metricsCollectorService = metricsCollectorService;
             this.logger = logger;
         }
 
@@ -56,7 +56,7 @@ namespace NotificationModule.Consumers
             await this.channel.QueueBindAsync(
                 queue: QueueName,
                 exchange: RabbitMQConstants.ExchangeName,
-                routingKey: RabbitMQConstants.OrderCompletedRoutingKey,
+                routingKey: RabbitMQConstants.NotificationSentRoutingKey,
                 cancellationToken: stoppingToken);
 
             AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(this.channel);
@@ -68,42 +68,23 @@ namespace NotificationModule.Consumers
 
                     this.logger.LogInformation("MESSAGE RECEIVED: {Message}", json);
 
-                    OrderCompletedEvent? orderCompletedEvent = JsonSerializer.Deserialize<OrderCompletedEvent>(json);
-                    if (orderCompletedEvent == null)
-                        return;
-
-                    // Simulate notification sending logic
-                    await Task.Delay(Random.Shared.Next(500, 1500), stoppingToken);
-
-                    NotificationSentEvent notificationSentEvent = new NotificationSentEvent
+                    NotificationSentEvent? notificationSentEvent = JsonSerializer.Deserialize<NotificationSentEvent>(json);
+                    if (notificationSentEvent == null)
                     {
-                        OrderId = orderCompletedEvent.OrderId,
-                        IsSuccessful = true,
-                        CorrelationId = orderCompletedEvent.CorrelationId,
-                        Timestamp = DateTime.UtcNow
-                    };
+                        await this.channel.BasicAckAsync(
+                            deliveryTag: eventArgs.DeliveryTag,
+                            multiple: false,
+                            cancellationToken: stoppingToken);
 
-                    await this.messageBus.PublishAsync(
-                        routingKey: RabbitMQConstants.NotificationSentRoutingKey,
-                        message: notificationSentEvent,
-                        cancellationToken: stoppingToken);
+                        return;
+                    }
+
+                    this.metricsCollectorService.RegisterOrderCompletion(notificationSentEvent.OrderId, notificationSentEvent.IsSuccessful);
 
                     await this.channel.BasicAckAsync(
                         deliveryTag: eventArgs.DeliveryTag,
                         multiple: false,
                         cancellationToken: stoppingToken);
-
-                    this.logger.LogInformation("""
-                        NOTIFICATION SENT
-                        OrderId: {OrderId}
-                        Price: {Price}
-                        PaymentId: {PaymentId}
-                        CorrelationId: {CorrelationId}
-                        """,
-                        orderCompletedEvent.OrderId,
-                        orderCompletedEvent.Price,
-                        orderCompletedEvent.PaymentId,
-                        orderCompletedEvent.CorrelationId);
                 }
                 catch (Exception ex)
                 {
@@ -126,7 +107,7 @@ namespace NotificationModule.Consumers
                 consumer: consumer,
                 cancellationToken: stoppingToken);
 
-            this.logger.LogInformation("OrderCompleted consumer started");
+            this.logger.LogInformation("NotificationSent consumer started");
 
             await Task.Delay(Timeout.Infinite, stoppingToken);
         }

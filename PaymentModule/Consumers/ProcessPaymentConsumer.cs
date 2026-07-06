@@ -193,11 +193,25 @@ namespace PaymentModule.Consumers
                         return;
                     }
 
+                    NotificationSentEvent notificationSentEvent = new NotificationSentEvent
+                    {
+                        OrderId = processPaymentCommand.OrderId,
+                        IsSuccessful = false,
+                        CorrelationId = processPaymentCommand.CorrelationId,
+                        Timestamp = DateTime.UtcNow
+                    };
+
+                    // Publish notification sent event to indicate that the message has been sent to the dead-letter queue
+                    await messageBus.PublishAsync(
+                        routingKey: RabbitMQConstants.NotificationSentRoutingKey,
+                        message: notificationSentEvent,
+                        cancellationToken: stoppingToken);
+
                     // Exceeded retries -> publish to explicit dead-letter queue
                     await this.PublishToDeadLetterQueueAsync(
-                        body,
-                        eventArgs.BasicProperties,
-                        stoppingToken);
+                        body: body,
+                        sourceProperties: eventArgs.BasicProperties,
+                        cancellationToken: stoppingToken);
 
                     await this.channel.BasicAckAsync(
                         deliveryTag: eventArgs.DeliveryTag,

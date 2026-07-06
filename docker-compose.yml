@@ -8,6 +8,12 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
   order-service:
     build:
@@ -23,22 +29,30 @@ services:
     build:
       context: .
       dockerfile: InventoryModule/Dockerfile
-    container_name: inventory-module
     depends_on:
-      - rabbitmq
+      rabbitmq:
+         condition: service_healthy
 
   payment-service:
     build:
       context: .
       dockerfile: PaymentModule/Dockerfile
-    container_name: payment-module
     depends_on:
-      - rabbitmq
+      rabbitmq:
+         condition: service_healthy
 
   notification-service:
     build:
       context: .
       dockerfile: NotificationModule/Dockerfile
-    container_name: notification-module
     depends_on:
-      - rabbitmq
+      rabbitmq:
+         condition: service_healthy
+
+  benchmark-service:
+    build:
+      context: .
+      dockerfile: BenchmarkModule/Dockerfile
+    depends_on:
+      rabbitmq:
+         condition: service_healthy

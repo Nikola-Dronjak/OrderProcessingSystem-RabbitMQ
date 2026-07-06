@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.37301.10
+# Visual Studio Version 18
+VisualStudioVersion = 18.7.11925.98 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderModule", "OrderModule\OrderModule.csproj", "{C36A9ED4-D4E1-4B7D-88BF-76D2B61DBC63}"
 EndProject
@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.dockerignore = .dockerignore
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchmarkModule", "BenchmarkModule\BenchmarkModule.csproj", "{CF69D7FF-CD7D-49FE-9D1F-AFB53E63DEB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8565C2C0-C651-4F18-8E08-08727D2D4949}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF69D7FF-CD7D-49FE-9D1F-AFB53E63DEB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF69D7FF-CD7D-49FE-9D1F-AFB53E63DEB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF69D7FF-CD7D-49FE-9D1F-AFB53E63DEB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF69D7FF-CD7D-49FE-9D1F-AFB53E63DEB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
