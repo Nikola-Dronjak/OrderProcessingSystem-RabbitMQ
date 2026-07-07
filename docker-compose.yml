@@ -19,11 +19,17 @@ services:
     build:
       context: .
       dockerfile: OrderModule/Dockerfile
-    container_name: order-module
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   inventory-service:
     build:
@@ -56,3 +62,5 @@ services:
     depends_on:
       rabbitmq:
          condition: service_healthy
+      order-service:
+        condition: service_healthy
