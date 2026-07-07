@@ -65,14 +65,24 @@ namespace BenchmarkModule.Services
             double throughput = numberOfCompletedOrders / totalTime.TotalSeconds;
             double averageLatency = latencies.Any() ? latencies.Average() : 0;
             double successRate = numberOfCompletedOrders == 0 ? 0 : (double)numberOfSuccessfulOrders / numberOfCompletedOrders * 100;
-            this.logger.LogInformation("===== BENCHMARK RESULTS =====");
-            this.logger.LogInformation($"Total completed orders: {numberOfCompletedOrders}");
-            this.logger.LogInformation($"Number of successful orders: {numberOfSuccessfulOrders}");
-            this.logger.LogInformation($"Number of failed orders: {numberOfFailedOrders}");
-            this.logger.LogInformation($"Success rate: {successRate}");
-            this.logger.LogInformation($"Total processing time: {totalTime.TotalSeconds}s");
-            this.logger.LogInformation($"Average latency : {averageLatency:F2} ms");
-            this.logger.LogInformation($"Throughput: {throughput:F2} orders/sec");
+            this.logger.LogInformation(
+                """
+                ===== BENCHMARK RESULTS =====
+                Total completed orders: {CompletedOrders}
+                Number of successful orders: {SuccessfulOrders}
+                Number of failed orders: {FailedOrders}
+                Success rate: {SuccessRate:F2}%
+                Total processing time: {ProcessingTime:F2}s
+                Average latency: {AverageLatency:F2} ms
+                Throughput: {Throughput:F2} orders/sec
+                """,
+                numberOfCompletedOrders,
+                numberOfSuccessfulOrders,
+                numberOfFailedOrders,
+                successRate,
+                totalTime.TotalSeconds,
+                averageLatency,
+                throughput);
         }
     }
 }

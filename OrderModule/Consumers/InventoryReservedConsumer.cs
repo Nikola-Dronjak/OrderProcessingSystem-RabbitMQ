@@ -13,6 +13,7 @@ namespace OrderModule.Consumers
     public class InventoryReservedConsumer : BackgroundService
     {
         private const string QueueName = "order.inventory-reserved";
+        private const int SimulatedOrchestrationProcessingDelayMilliseconds = 1000;
 
         private readonly RabbitMQSettings settings;
         private readonly IMessageBus messageBus;
@@ -74,7 +75,7 @@ namespace OrderModule.Consumers
                         return;
 
                     // Simulate orchestration processing time
-                    await Task.Delay(Random.Shared.Next(500, 2000), stoppingToken);
+                    await Task.Delay(SimulatedOrchestrationProcessingDelayMilliseconds, stoppingToken);
 
                     ProcessPaymentCommand processPaymentCommand = new ProcessPaymentCommand
                     {

@@ -12,6 +12,7 @@ namespace NotificationModule.Consumers
     public class OrderCompletedConsumer : BackgroundService
     {
         private const string QueueName = "notification.order-completed";
+        private const int SimulatedNotificationProcessingDelayMilliseconds = 500;
 
         private readonly RabbitMQSettings settings;
         private readonly IMessageBus messageBus;
@@ -73,7 +74,7 @@ namespace NotificationModule.Consumers
                         return;
 
                     // Simulate notification sending logic
-                    await Task.Delay(Random.Shared.Next(500, 1500), stoppingToken);
+                    await Task.Delay(SimulatedNotificationProcessingDelayMilliseconds, stoppingToken);
 
                     NotificationSentEvent notificationSentEvent = new NotificationSentEvent
                     {

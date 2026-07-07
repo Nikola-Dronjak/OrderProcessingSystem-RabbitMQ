@@ -4,6 +4,8 @@ namespace BenchmarkModule
 {
     public class BenchmarkWorker : BackgroundService
     {
+        private const int NumberOfOrders = 100;
+
         private readonly IOrderGeneratorService orderGeneratorService;
         private readonly IMetricsCollectorService metricsCollectorService;
         private readonly ILogger<BenchmarkWorker> logger;
@@ -18,8 +20,8 @@ namespace BenchmarkModule
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             this.logger.LogInformation("Starting benchmark...");
-            this.metricsCollectorService.StartBenchmark(100);
-            await this.orderGeneratorService.GenerateOrders(100);
+            this.metricsCollectorService.StartBenchmark(NumberOfOrders);
+            await this.orderGeneratorService.GenerateOrders(NumberOfOrders);
             this.logger.LogInformation("Waiting for benchmark to complete...");
             await this.metricsCollectorService.WaitForCompletionAsync(stoppingToken);
             this.metricsCollectorService.ShowBenchmarkResults();

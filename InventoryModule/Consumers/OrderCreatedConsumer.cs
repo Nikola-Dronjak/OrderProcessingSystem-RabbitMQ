@@ -12,6 +12,7 @@ namespace InventoryModule.Consumers
     public class OrderCreatedConsumer : BackgroundService
     {
         private const string QueueName = "inventory.order-created";
+        private const int SimulatedInventoryProcessingDelayMilliseconds = 500;
 
         private readonly RabbitMQSettings settings;
         private readonly IMessageBus messageBus;
@@ -73,7 +74,7 @@ namespace InventoryModule.Consumers
                         return;
 
                     // Simulate inventory processing logic
-                    await Task.Delay(Random.Shared.Next(500, 2000), stoppingToken);
+                    await Task.Delay(SimulatedInventoryProcessingDelayMilliseconds, stoppingToken);
 
                     InventoryReservedEvent inventoryReservedEvent = new InventoryReservedEvent
                     {
