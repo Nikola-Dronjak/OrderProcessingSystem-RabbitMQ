@@ -2,11 +2,11 @@
 {
     public static class RabbitMQConstants
     {
-        #region Exchange names:
+        #region Exchange names
         public const string ExchangeName = "order-processing";
         #endregion
 
-        #region Routing keys:
+        #region Routing keys
         public const string OrderCreatedRoutingKey = "order-created";
         public const string InventoryReservedRoutingKey = "inventory-reserved";
         public const string ProcessPaymentRoutingKey = "process-payment";
